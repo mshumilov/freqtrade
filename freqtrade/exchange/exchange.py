@@ -2096,15 +2096,16 @@ class Exchange:
         if ticks and cache:
             idx = -2 if drop_incomplete and len(ticks) > 1 else -1
             self._pairs_last_refresh_time[(pair, timeframe, c_type)] = ticks[idx][0] // 1000
+        have_downtime = self._config['exchange'].get('downtime', False)
         # keeping parsed dataframe in cache
-        ohlcv_df = ohlcv_to_dataframe(ticks, timeframe, pair=pair, fill_missing=True,
+        ohlcv_df = ohlcv_to_dataframe(ticks, timeframe, pair=pair, fill_missing=not have_downtime,
                                       drop_incomplete=drop_incomplete)
         if cache:
             if (pair, timeframe, c_type) in self._klines:
                 old = self._klines[(pair, timeframe, c_type)]
                 # Reassign so we return the updated, combined df
                 ohlcv_df = clean_ohlcv_dataframe(concat([old, ohlcv_df], axis=0), timeframe, pair,
-                                                 fill_missing=True, drop_incomplete=False)
+                                                 fill_missing=not have_downtime, drop_incomplete=False)
                 candle_limit = self.ohlcv_candle_limit(timeframe, self._config['candle_type_def'])
                 # Age out old candles
                 ohlcv_df = ohlcv_df.tail(candle_limit + self._startup_candle_count)
