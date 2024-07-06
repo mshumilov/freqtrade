@@ -250,7 +250,6 @@ class Exchange:
 
         if not is_exchange_known_ccxt(name, ccxt_module):
             raise OperationalException(f'Exchange {name} is not supported by ccxt')
-
         ex_config = {
             'apiKey': exchange_config.get('key'),
             'secret': exchange_config.get('secret'),
